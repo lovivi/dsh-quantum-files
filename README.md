@@ -89,7 +89,7 @@ FBQ 进程日志在 `~/.dsh/logs/dsh-web.log`；状态端点 `GET /-/fbq/__bridg
 ## 开发
 
 ```sh
-npm test                                  # 35 条用例，不到 1 秒，不需要 DSH / 不需要真 FBQ
+npm test                                  # 36 条用例，不到 1 秒，不需要 DSH / 不需要真 FBQ
 node scripts/build-client.mjs             # 改完 client/index.js 必须重跑（CI 会检查）
 node scripts/dev-server.js --port 3091    # 带真 FBQ 的旁路 harness，不碰 DSH
 node scripts/verify.js --base http://127.0.0.1:3091   # 对跑起来的端点压端到端用例

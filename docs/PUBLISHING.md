@@ -38,7 +38,7 @@ tarball 之后，profile 的 `package.json` 自己多了这一条），不用手
 ```sh
 npm run build:client
 git diff --exit-code        # bundle 必须已提交
-npm test                    # 35 条，不到 1 秒
+npm test                    # 36 条，不到 1 秒
 npm pack --dry-run          # 12 个文件、约 23 KiB
 ```
 
