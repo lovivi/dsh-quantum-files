@@ -1,84 +1,85 @@
 # 发布清单
 
-面向把 `dsh-fbq-bridge` 发布到 npm / GitHub 的操作步骤。发布前逐项打勾。
+总耗时约 20 分钟（不含 npm 排队）。按顺序做，每步都能独立验证。
 
-## 0. 一次性替换占位
+## 1. 替换占位（5 分钟）
 
-| 位置 | 需要改成 |
+| 位置 | 改成 |
 |---|---|
-| `package.json` → 追加 `repository` / `bugs` / `homepage` | 你的 GitHub 仓库地址 |
-| `LICENSE` → 版权行 | 你的名字或组织名 |
-| `README.md` 顶部的安装命令 | 确认包名与你发布的一致 |
+| `package.json` | 加 `repository` / `bugs` / `homepage` 三个字段，填你的仓库地址 |
+| `LICENSE` 第 3 行 | 你的名字或组织名 |
+| `README.md` 第一段 | 确认包名与你实际发布的一致 |
 
-## 1. 发布前检查
+改完 `git diff` 看一眼，别把 token 或私有路径带进去。
+
+## 2. 本地验收（3 分钟）
 
 ```sh
-npm run build:client        # 确认 client/bundle.js 是最新的
-git diff --exit-code        # 构建产物必须已提交
-npm test                    # 34 条测试全绿（不需要 DSH、不需要真 FBQ）
-npm pack --dry-run          # 看清单：不能有 vendor/ research/ test/ *.sqlite
+npm run build:client
+git diff --exit-code        # bundle 必须已提交，否则公开发布会缺文件
+npm test                    # 34 条，不到 1 秒
+npm pack --dry-run          # 看清单
 ```
 
-`npm pack --dry-run` 的期望内容：
+`npm pack` 期望 12 个文件、约 23 KiB：
 
 ```
-LICENSE
-README.md
-client/bundle.js
-cordis.patch.yml
-package.json
-src/*.js
+LICENSE  README.md  package.json
+client/bundle.js  cordis.patch.yml
+src/{index,config,binaries,supervisor,proxy,gate,direct}.js
 ```
 
-## 2. 版本与提交
+出现 `vendor/`、`research/`、`test/` 或 `*.sqlite` 就是 `files` 白名单被改坏了。
+
+## 3. 提交并打 tag（2 分钟）
 
 ```sh
 git add -A
-git commit -m "feat: dsh-fbq-bridge 0.1.0"
+git commit -m "docs: 面向发布重写说明"
 git tag v0.1.0
 git push origin main --tags
 ```
 
-## 3. 发布 npm
+## 4. 发布 npm（5 分钟）
 
 ```sh
 npm login
-npm publish            # publishConfig.access 已设为 public
+npm publish         # publishConfig.access 已是 public
 ```
 
-发布后立刻验证一次真实安装：
+## 5. 用真实安装验一遍（5 分钟）
 
 ```sh
 dsh plugin --profile web add dsh-fbq-bridge
 ~/.dsh/start-web.sh restart
 ```
 
-然后**刷新页面**，确认：
+刷新页面，确认三件事：
 
-1. 会话标题右侧出现「📁 文件」按钮，点开右栏能看到 FBQ
+1. 会话标题右侧有「📁 文件」按钮，点开右栏出现 FBQ 界面
 2. 右侧栏 `+` → 指南里有「文件 (FBQ)」
 3. 对话区顶部有「文件」tab
 
-## 4. 安全相关的发布文案
+三条都中就算发布成功。中不了先看 `~/.dsh/logs/dsh-web.log` 里 `[dsh-fbq-bridge]` 开头的行。
 
-发布说明里至少要写清楚这几点（README 已写，别删）：
+## 发布文案里必须保留的四句
 
-- 插件会在首次使用时**按内置 sha256 校验后**下载 FBQ 二进制（约 29 MB）
-- FBQ 只监听 Unix socket，两个前门是它唯一入口
-- `proxy` 模式下 FBQ 盲信身份头，**不要**把 `fbq.yaml` 改成监听 TCP
-- 插件以你的用户身份运行，不受 DSH 会话文件沙箱限制
-- 允许用 `fbq.binary` 指向你自己构建的二进制，完全跳过下载
+1. 首次使用会按内置 sha256 校验后下载 FBQ 二进制（约 29 MB）
+2. FBQ 只监听 Unix socket，两个前门是唯一入口
+3. `proxy` 模式下 FBQ 盲信身份头，不要把 `fbq.yaml` 改成监听 TCP
+4. 插件以你的用户身份运行，不受 DSH 会话文件沙箱限制
 
-## 5. 升级 FBQ 版本
+## 升级 FBQ 版本（每次约 15 分钟）
 
-1. 改 `scripts/update-binaries.js` 里的版本号并运行（有网时自动拉 release API 的 digest）
-2. `npm test`
-3. 在真机上冒烟：健康检查、上传、下载、Range、WebDAV
-4. 发 patch 版本（例如 0.1.1），CHANGELOG 里写明 FBQ 从哪个版本升到哪个版本
+```sh
+node scripts/update-binaries.js v2.1.7-beta
+npm test
+```
 
-## 6. 已知的发布环境坑
+然后在本机冒烟四项：健康检查、上传、下载（Range 拖一下视频）、WebDAV。四项都过再发 patch 版本，CHANGELOG 里写清从哪个 FBQ 版本升到哪个。
 
-- **pnpm 版本**：DSH profile 的锁文件由 pnpm 11 生成；pnpm 12 会因缺少 integrity 字段拒绝安装。
-  这不是本插件的问题，但用户报「装不上」时先问这个。
-- **registry 不通**：国内网络下 `registry.npmmirror.com` 偶尔连不上，可临时
-  `npm_config_registry=https://registry.npmjs.org/ dsh plugin --profile web add dsh-fbq-bridge`。
+## 两个环境坑（用户报「装不上」时先问这个）
+
+1. **pnpm 12** 会因为旧锁文件缺 integrity 字段拒绝安装。让用户 `npm i -g pnpm@11.1.3`。
+2. **registry 不通**（国内常见）。让用户加环境变量：
+   `npm_config_registry=https://registry.npmjs.org/ dsh plugin --profile web add dsh-fbq-bridge`

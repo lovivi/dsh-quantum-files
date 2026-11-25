@@ -3,7 +3,7 @@
 > 把 FileBrowser Quantum（下称 FBQ）作为 sidecar 嵌进 DeepSeek Harness，
 > 提供「DSH 内嵌使用 + 独立端口访问 + 可配置鉴权」三种能力，共用同一个 FBQ 实例。
 
-- 状态：设计定稿，开发中
+- 状态：已实现，v0.1.0 已发布（本文保留为设计与测试依据）
 - 日期：2026-11-24
 - 目标环境：Linux x86_64，DSH 0.2.1-rc.3，Node 22，FBQ v2.1.6-beta
 
@@ -95,8 +95,9 @@
 ├─ src/{index,config,binary,supervisor,proxy,gate}.js
 ├─ client/{index.js,bundle.js}
 ├─ scripts/build-client.mjs
-├─ scripts/smoke.mjs               # 冒烟测试
-└─ test/{proxy,gate,lifecycle}.test.mjs
+├─ scripts/dev-server.js           # 带真 FBQ 的旁路 harness（不依赖 DSH）
+├─ scripts/verify.js               # 对跑起来的端点压端到端用例
+└─ test/{unit,client,integration}.test.js
 ```
 
 ---
@@ -194,7 +195,7 @@
 | T0.3 子路径完整性 | curl 首页 HTML 提取资源路径 | 所有资源 URL 以 `/-/fbq/` 开头 |
 | T0.4 帧头 | `curl -I` 检查 `X-Frame-Options`/CSP | 记录实际值，决定 R5 是否触发 |
 
-### 阶段 1 — 反代单元测试（`test/proxy.test.mjs`）
+### 阶段 1 — 反代单元测试（`test/unit.test.js` + `test/integration.test.js`）
 
 用 mock upstream（node http server）验证，不依赖 FBQ：
 
@@ -208,7 +209,7 @@
 | T1.6 客户端中断 | 发送方 abort 后 upstream 连接关闭，无句柄泄漏 |
 | T1.7 上游不可达 | 返回 502 且不崩溃 |
 
-### 阶段 2 — 鉴权测试（`test/gate.test.mjs`）
+### 阶段 2 — 鉴权测试（`test/unit.test.js` + `test/integration.test.js`）
 
 | 用例 | 断言 |
 |---|---|
@@ -251,7 +252,14 @@
 | T5.2 端口/证书 | 3080 TLS 正常；3090 TLS 正常 |
 | T5.3 回滚 | 从 profile 移除插件后 DSH 正常启动 |
 
-**自动化入口**：`npm test` 跑阶段 1–3（纯 Node，无需 DSH）；阶段 4–5 为脚本 + 人工确认。
+**自动化入口**：`npm test` 覆盖阶段 0–3 中可脱离环境的部分（34 条用例，不到 1 秒，纯 Node），
+其中：
+
+- `test/unit.test.js` — 头处理、鉴权门、配置生成
+- `test/client.test.js` — 在假 DOM 里执行 `client/bundle.js`，按**真实槽位契约**校验三个入口的注册
+- `test/integration.test.js` — 假上游 unix socket，跑通两个前门（T0.x/T1.x/T2.x/T3.x 的可自动化子集）
+
+不可自动化的部分（阶段 4 的视觉确认、阶段 5 的切换）由 `scripts/dev-server.js` + `scripts/verify.js` + 浏览器实测完成。
 
 ---
 
@@ -265,3 +273,13 @@
 | M3 | client tab | DSH 内嵌可用 |
 | M4 | 测试全绿 + 安装 | profile 装载，旁路实例验证 |
 | M5 | 切线上 | 重启 `dsh-web.service`，交付访问说明 |
+
+**实际完成情况**：M0–M5 全部完成。验收时用无头 chromium 实测了三个入口（会话头按钮、
+右侧栏 guide、对话区 tab），截图见 `docs/shots/`。过程中修复了两个真问题：
+
+1. `sidebar.right.pane.tab` 是 keyed 槽位，必须传 `key` 而不是 `id`——传错时类型注册成功、
+   body 没注册，界面显示「这类内容还没有可用的查看方式」。
+2. DSH 的 `Principal` 是对象（`{kind:'owner'}`），直接字符串化会把 `[object Object]` 写进
+   FBQ 用户表；现映射为系统用户名。
+
+这两条都已加入单测断言，防止回归。
