@@ -1,0 +1,50 @@
+{
+  "name": "dsh-fbq-bridge",
+  "version": "0.1.0",
+  "private": false,
+  "description": "把 FileBrowser Quantum 以 sidecar 方式嵌进 DeepSeek Harness：右侧栏/对话区内嵌 + 独立端口 + DSH 会话鉴权",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "filebrowser",
+    "file-manager",
+    "file-browser"
+  ],
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./client/bundle.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src/",
+    "client/bundle.js",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:client": "node scripts/build-client.mjs",
+    "test": "node --test test/*.test.js",
+    "dev": "node scripts/dev-server.js --port 3091",
+    "verify": "node scripts/verify.js",
+    "prepublishOnly": "npm run build:client && npm test"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,10 @@
+# dsh-fbq-bridge bundle patch: contributes the bridge row into the HOST plane
+# composition when this package is installed via `dsh plugin add`.
+#
+# The plugin is HOST-PLANE: it owns the FBQ child process, proxies both front
+# doors (the same-origin /-/fbq route on ctx.webServer and its own listener),
+# and therefore must land in the host composition — never inside an agent preset.
+
+- insert:
+    - id: fbq-bridge
+      name: dsh-fbq-bridge
