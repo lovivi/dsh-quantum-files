@@ -74,6 +74,11 @@ function createDirectServer(cfg, hooks) {
   const basePath = cfg.fbq.basePath
   const statusPath = `${basePath}/__bridge/status`
 
+  // 注意：info() 会被早退分支（未启用/缺证书）调用，所以 tls 必须在这个作用域里
+  // 先以 null 初始化，否则访问 `tls` 会抛 ReferenceError（TDZ）——曾经的实测 bug。
+  let tls = null
+  let server = null
+
   const info = (extra) => ({
     enabled: Boolean(server && server.listening),
     host: direct.host,
@@ -96,7 +101,7 @@ function createDirectServer(cfg, hooks) {
     }
   }
 
-  const tls = resolveTls(cfg)
+  tls = resolveTls(cfg)
   if (!isLoopback(direct.host) && direct.requireTlsOnLan && !tls) {
     const refused =
       `独立端口绑定到 ${direct.host} 但找不到 TLS 证书；已拒绝启动独立端口。` +
@@ -151,7 +156,7 @@ function createDirectServer(cfg, hooks) {
     })
   }
 
-  const server = tls ? https.createServer(tls, listener) : http.createServer(listener)
+  server = tls ? https.createServer(tls, listener) : http.createServer(listener)
   // 绑定成功/失败都要能等到，避免调用方拿到 address() === null
   const listening = new Promise((resolve) => {
     server.once('error', (e) => {

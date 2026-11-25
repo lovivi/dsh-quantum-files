@@ -21,6 +21,9 @@
 
 - `sidebar.right.pane.tab` 是 keyed 槽位，注册选项必须是 `key` 而非 `id`；
   之前传错导致「这类内容还没有可用的查看方式」。
+- 独立端口关闭（`direct.enabled: false`）时，状态端点 `/__bridge/status` 会抛
+  `ReferenceError`（闭包里的 `tls` / `server` 尚未初始化），DSH 的 webserver 把它转成
+  400。打包验收时发现，已加回归测试。
 - DSH 的 `Principal` 是对象（`{kind:'owner'}`），直接字符串化会把 `[object Object]`
   写进 FBQ 用户表；现映射为系统用户名。
 

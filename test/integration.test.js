@@ -373,6 +373,18 @@ test('T2.4 独立端口只读模式：写方法 403，GET/PROPFIND 放行', asyn
   })
 })
 
+test('独立端口未启用时 info() 不能抛异常（TDZ 回归）', async () => {
+  const cfg = loadConfig(
+    { fbq: { socketPath: '/tmp/never.sock', basePath: '/-/fbq' }, direct: { enabled: false } },
+    { skipFile: true },
+  )
+  const direct = createDirectServer(cfg, { onStatus: () => ({}), onRequest: () => {}, logger: quiet })
+  assert.equal(direct.server, null)
+  const info = direct.info() // 以前这里会抛 ReferenceError: Cannot access 'tls' before initialization
+  assert.equal(info.enabled, false)
+  assert.equal(info.tls, false)
+})
+
 test('独立端口：根路径 302 到 basePath', async () => {
   await withHarness(async ({ socketPath }) => {
     const directCfg = loadConfig(

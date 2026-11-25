@@ -282,4 +282,8 @@
 2. DSH 的 `Principal` 是对象（`{kind:'owner'}`），直接字符串化会把 `[object Object]` 写进
    FBQ 用户表；现映射为系统用户名。
 
-这两条都已加入单测断言，防止回归。
+3. 独立端口未启用时，`direct.info()` 闭包访问了尚未初始化的 `tls` / `server`（TDZ），
+   状态端点抛异常被 webserver 转成 400。**打包验收**（装 tarball 到独立 profile 再启动）
+   才暴露出来，已加回归测试。
+
+三条都已加入单测断言，防止回归。
