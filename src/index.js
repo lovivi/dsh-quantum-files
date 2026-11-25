@@ -87,6 +87,15 @@ function apply(ctx, rowConfig) {
 
   async function handleProxy(req, res, principal) {
     if (!supervisor.ready) {
+      // 自愈：就绪标记可能因为启动期的一次探测失败而卡住，但进程其实已经好了。
+      // 每次请求最多多花 1.5s 做一次真实探测，成功就继续。
+      const alive = await supervisor.probeOnce(1500)
+      if (alive) {
+        supervisor.ready = true
+        logger.log('FBQ 探测成功，就绪标记已自愈')
+      }
+    }
+    if (!supervisor.ready) {
       sendJson(res, 503, {
         ok: false,
         error: 'fbq-not-ready',

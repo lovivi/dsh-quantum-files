@@ -373,6 +373,22 @@ test('T2.4 独立端口只读模式：写方法 403，GET/PROPFIND 放行', asyn
   })
 })
 
+test('supervisor.probeOnce 能识别 socket 是否就绪（自愈依据）', async () => {
+  const { FbqSupervisor } = require('../src/supervisor')
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'dshfbq-'))
+  const socketPath = path.join(dir, 'probe.sock')
+  const mock = await startMockFbq(socketPath)
+  const cfg = loadConfig({ fbq: { socketPath, basePath: '/-/fbq' } }, { skipFile: true })
+  const sup = new FbqSupervisor(cfg, quiet)
+  try {
+    assert.equal(await sup.probeOnce(1000), true, '假上游在时探测应为真')
+  } finally {
+    await mock.close()
+  }
+  assert.equal(await sup.probeOnce(500), false, '上游关掉后探测应为假')
+  fs.rmSync(dir, { recursive: true, force: true })
+})
+
 test('独立端口未启用时 info() 不能抛异常（TDZ 回归）', async () => {
   const cfg = loadConfig(
     { fbq: { socketPath: '/tmp/never.sock', basePath: '/-/fbq' }, direct: { enabled: false } },

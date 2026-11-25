@@ -205,9 +205,23 @@ class FbqSupervisor {
     await this.waitReady()
   }
 
+  /**
+   * 单次健康探测（不改变 ready 之外的任何状态）。
+   * 用于「request 到来时认为未就绪，但进程其实已经好了」的自愈路径。
+   */
+  async probeOnce(timeoutMs = 1500) {
+    const out = await requestOnce({
+      socketPath: this.cfg.paths.socketPath,
+      path: `${this.cfg.fbq.basePath}/api/health`,
+      timeoutMs,
+    })
+    return Boolean(out && out.status > 0 && out.status < 500)
+  }
+
   async waitReady() {
     const deadline = Date.now() + this.cfg.fbq.startTimeoutMs
     const base = this.cfg.fbq.basePath
+    let last = null
     while (Date.now() < deadline) {
       if (!this.proc) throw new Error('FBQ 进程在就绪前退出，检查最近日志')
       const out = await requestOnce({
@@ -215,6 +229,7 @@ class FbqSupervisor {
         path: `${base}/api/health`,
         timeoutMs: 3000,
       })
+      last = out
       if (out.status > 0 && out.status < 500) {
         this.ready = true
         this.restarts = 0
@@ -223,7 +238,9 @@ class FbqSupervisor {
       }
       await new Promise((r) => setTimeout(r, 250))
     }
-    throw new Error(`FBQ 在 ${this.cfg.fbq.startTimeoutMs}ms 内未就绪，检查最近日志`)
+    throw new Error(
+      `FBQ 在 ${this.cfg.fbq.startTimeoutMs}ms 内未就绪（最后一次探测: ${JSON.stringify(last)}），检查最近日志`,
+    )
   }
 
   scheduleRestart() {
