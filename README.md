@@ -18,6 +18,28 @@ dsh plugin --profile web add dsh-quantum-files      # npm（发布后可用）
 dsh plugin --profile web add link:/path/to/repo     # 本地开发
 ```
 
+## 先看效果
+
+右侧栏（工具条上的「全屏」可以铺满视口）：
+
+![右侧栏形态](docs/shots/right-sidebar-works.png)
+
+右侧栏 `+` → 指南里的入口，点开就是同一个 FBQ：
+
+![指南入口](docs/shots/sidebar-guide.png)
+
+对话区全宽形态，适合当主文件管理器：
+
+![对话区形态](docs/shots/tab-works.png)
+
+## 让 agent 帮你装
+
+把下面整段复制给任意一个 DSH 会话，它会自己装好并验证：
+
+```
+请帮我安装并启用 DSH 插件 dsh-quantum-files：运行 dsh plugin --profile web add github:lovivi/dsh-quantum-files，然后执行 ~/.dsh/start-web.sh restart；起来后确认 GET /-/fbq/ 返回 200、右侧栏能看到「文件」入口，并把入口位置告诉我。注意：首次启动会按内置 sha256 下载约 29 MB 的 FBQ 二进制，需要联网；安装会改动 profile，属于会写盘的操作。
+```
+
 ## 装好后你会看到
 
 三个入口，同一个 FBQ，同一份文件：
