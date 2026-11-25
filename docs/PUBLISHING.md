@@ -13,7 +13,7 @@
 | 渠道 | 用户怎么装 | 你要做什么 |
 |---|---|---|
 | **npm（主渠道）** | `dsh plugin --profile web add dsh-quantum-files` | `npm publish` |
-| **GitHub** | `dsh plugin --profile web add github:<you>/dsh-quantum-files` | 推仓库，不用发布 |
+| **GitHub** | `dsh plugin --profile web add github:lovivi/dsh-quantum-files` | 推仓库，不用发布 |
 | **社区市场索引** | Plugins → Discover → 添加索引 URL | 往索引仓库提 PR（见第 6 步） |
 
 两条硬要求（缺了装上也白装）：
@@ -112,13 +112,13 @@ dsh plugin --profile web add dsh-quantum-files
 ```json
 {
   "name": "dsh-quantum-files",
-  "title": "<you>/dsh-quantum-files",
+  "title": "lovivi/dsh-quantum-files",
   "description": {
     "en": "Embed FileBrowser Quantum into DSH: right-sidebar tab, conversation tab, a separate TLS port, and DSH-session auth.",
     "zh": "把 FileBrowser Quantum 嵌进 DSH：右侧栏 tab、对话区 tab、独立 TLS 端口，复用 DSH 会话鉴权。"
   },
-  "homepage": "https://github.com/<you>/dsh-quantum-files",
-  "repository": { "url": "https://github.com/<you>/dsh-quantum-files" },
+  "homepage": "https://github.com/lovivi/dsh-quantum-files",
+  "repository": { "url": "https://github.com/lovivi/dsh-quantum-files" },
   "metadata": {
     "category": "ui",
     "keywords": ["filebrowser", "file-manager"],
@@ -137,6 +137,18 @@ dsh plugin --profile web add dsh-quantum-files
 ```
 
 `category` 用清单里的 slug：本插件建议 **`ui`（UI Enhancements）**，备选 `tools`。
+
+## 6.5 补 CI 工作流（可选，2 分钟）
+
+首次推仓库时如果 token 没有 `workflow` scope，`.github/workflows/ci.yml` 会被 GitHub
+拒绝推送（OAuth App 不允许创建/更新 workflow 文件）。补上：
+
+```sh
+gh auth refresh -h github.com -s workflow
+git add -f .github/workflows/ci.yml
+git commit -m "ci: 启用 GitHub Actions"
+git push
+```
 
 ## 7. 升级 FBQ 版本（每次约 15 分钟）
 

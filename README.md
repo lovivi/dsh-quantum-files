@@ -3,14 +3,18 @@
 在 DSH 里用 FileBrowser Quantum 管文件。两行命令装好：
 
 ```sh
-dsh plugin --profile web add dsh-quantum-files
+dsh plugin --profile web add github:lovivi/dsh-quantum-files
 ~/.dsh/start-web.sh restart
 ```
 
-> 上面是发布到 npm 之后的写法。现在还没发布，用本地路径：
-> `dsh plugin --profile web add link:/path/to/dsh-quantum-files`
-
 装完刷新浏览器，**进任意会话，点标题右侧的「📁 文件」**。
+
+其他装法：
+
+```sh
+dsh plugin --profile web add dsh-quantum-files      # npm（发布后可用）
+dsh plugin --profile web add link:/path/to/repo     # 本地开发
+```
 
 ## 装好后你会看到
 
