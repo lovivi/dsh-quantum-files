@@ -1,5 +1,7 @@
 # dsh-quantum-files
 
+[![ci](https://github.com/lovivi/dsh-quantum-files/actions/workflows/ci.yml/badge.svg)](https://github.com/lovivi/dsh-quantum-files/actions/workflows/ci.yml)
+
 在 DSH 里用 FileBrowser Quantum 管文件。两行命令装好：
 
 ```sh
