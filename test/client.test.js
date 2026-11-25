@@ -101,13 +101,13 @@ function loadBundle() {
 
 test('bundle 结构：__ModuleLoader__ + id + factory', () => {
   const { registrations } = loadBundle()
-  assert.equal(registrations.loaded.id, 'dsh-fbq-bridge')
+  assert.equal(registrations.loaded.id, 'dsh-quantum-files')
   assert.equal(typeof registrations.loaded.factory, 'function')
 })
 
 test('plugin 声明 name / inject / apply', () => {
   const { plugin } = loadBundle()
-  assert.equal(plugin.name, 'dsh-fbq-bridge')
+  assert.equal(plugin.name, 'dsh-quantum-files')
   assert.deepEqual(plugin.inject, ['slots', 'sidebarRightTabs', 'sidebarRight'])
   assert.equal(typeof plugin.apply, 'function')
 })
@@ -117,7 +117,7 @@ test('apply 注册 conversation.view tab', () => {
   plugin.apply(ctx)
   const view = registrations.slots.find((s) => s.spec.name === 'conversation.view')
   assert.ok(view, '应注册 conversation.view')
-  assert.equal(view.spec.id, 'dsh-fbq-bridge')
+  assert.equal(view.spec.id, 'dsh-quantum-files')
   assert.equal(view.spec.order, 27)
   assert.equal(view.spec.label(), '文件')
   assert.equal(typeof view.component, 'function')

@@ -1,14 +1,14 @@
-# dsh-fbq-bridge
+# dsh-quantum-files
 
 在 DSH 里用 FileBrowser Quantum 管文件。两行命令装好：
 
 ```sh
-dsh plugin --profile web add dsh-fbq-bridge
+dsh plugin --profile web add dsh-quantum-files
 ~/.dsh/start-web.sh restart
 ```
 
 > 上面是发布到 npm 之后的写法。现在还没发布，用本地路径：
-> `dsh plugin --profile web add link:/path/to/dsh-fbq-bridge`
+> `dsh plugin --profile web add link:/path/to/dsh-quantum-files`
 
 装完刷新浏览器，**进任意会话，点标题右侧的「📁 文件」**。
 
@@ -70,7 +70,7 @@ DSH :3080  /-/fbq/*  → [校验 DSH 会话] ─┐
 | 右侧栏显示「这类内容还没有可用的查看方式」 | 之前版本的 bug（`keyed` 槽位传错参数） | 升级到 ≥0.1.0 并硬刷新 |
 | 页面里 503、提示 fbq-not-ready | FBQ 还在启动或正在重启 | 等 10 秒刷新；仍不行看 `~/.dsh/fbq/data/` 下的进程状态 |
 | `dsh plugin add` 报 lockfile 校验失败 | pnpm 12 对旧锁文件更严格 | 用 pnpm 11：`npm i -g pnpm@11.1.3` |
-| 装依赖卡住不动 | registry 不通（国内） | `npm_config_registry=https://registry.npmjs.org/ dsh plugin --profile web add dsh-fbq-bridge` |
+| 装依赖卡住不动 | registry 不通（国内） | `npm_config_registry=https://registry.npmjs.org/ dsh plugin --profile web add dsh-quantum-files` |
 
 FBQ 进程日志在 `~/.dsh/logs/dsh-web.log`；状态端点 `GET /-/fbq/__bridge/status` 会返回 PID、就绪状态和最近日志。
 

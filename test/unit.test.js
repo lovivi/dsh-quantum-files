@@ -36,7 +36,7 @@ test('T1.2 剔除 hop-by-hop 头，保留业务头', () => {
   assert.equal(headers.range, 'bytes=0-99')
   assert.equal(headers.cookie, 'a=b')
   assert.equal(headers['content-type'], 'multipart/form-data; boundary=x')
-  assert.equal(headers.host, 'dsh-fbq-bridge')
+  assert.equal(headers.host, 'dsh-quantum-files')
 })
 
 test('T2.6 客户端自带的身份头被丢弃', () => {

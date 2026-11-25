@@ -12,8 +12,8 @@
 
 | 渠道 | 用户怎么装 | 你要做什么 |
 |---|---|---|
-| **npm（主渠道）** | `dsh plugin --profile web add dsh-fbq-bridge` | `npm publish` |
-| **GitHub** | `dsh plugin --profile web add github:<you>/dsh-fbq-bridge` | 推仓库，不用发布 |
+| **npm（主渠道）** | `dsh plugin --profile web add dsh-quantum-files` | `npm publish` |
+| **GitHub** | `dsh plugin --profile web add github:<you>/dsh-quantum-files` | 推仓库，不用发布 |
 | **社区市场索引** | Plugins → Discover → 添加索引 URL | 往索引仓库提 PR（见第 6 步） |
 
 两条硬要求（缺了装上也白装）：
@@ -52,13 +52,13 @@ npm pack --dry-run          # 12 个文件、约 23 KiB
 ```sh
 npm pack --pack-destination /tmp/pack
 dsh --profile pkgverify --from-default-profile web --dump-config > /dev/null
-dsh plugin --profile pkgverify add /tmp/pack/dsh-fbq-bridge-0.1.0.tgz
-dsh --profile pkgverify --dump-config | grep -A2 fbq-bridge   # 组合里有这一行才算成功
+dsh plugin --profile pkgverify add /tmp/pack/dsh-quantum-files-0.1.0.tgz
+dsh --profile pkgverify --dump-config | grep -A2 quantum-files   # 组合里有这一行才算成功
 ```
 
 通过标准（四条都中）：
 
-1. `--dump-config` 里出现 `- id: fbq-bridge`
+1. `--dump-config` 里出现 `- id: quantum-files`
 2. 启动后 `~/.dsh/fbq/data/fbq.sock` 出现（说明 FBQ 被拉起）
 3. `GET /-/fbq/` 带 DSH cookie 返回 200，不带 cookie 返回 401
 4. `GET /-/fbq/__bridge/status` 返回 200 的 JSON
@@ -84,7 +84,7 @@ npm publish         # publishConfig.access 已是 public
 用真实安装验一遍：
 
 ```sh
-dsh plugin --profile web add dsh-fbq-bridge
+dsh plugin --profile web add dsh-quantum-files
 ~/.dsh/start-web.sh restart
 ```
 
@@ -94,7 +94,7 @@ dsh plugin --profile web add dsh-fbq-bridge
 2. 右侧栏 `+` → 指南里有「文件 (FBQ)」
 3. 对话区顶部有「文件」tab
 
-三条都中就算发布成功。中不了看 `~/.dsh/logs/dsh-web.log` 里 `[dsh-fbq-bridge]` 开头的行。
+三条都中就算发布成功。中不了看 `~/.dsh/logs/dsh-web.log` 里 `[dsh-quantum-files]` 开头的行。
 
 ## 6. 上社区清单（可选，10 分钟）
 
@@ -111,14 +111,14 @@ dsh plugin --profile web add dsh-fbq-bridge
 
 ```json
 {
-  "name": "dsh-fbq-bridge",
-  "title": "<you>/dsh-fbq-bridge",
+  "name": "dsh-quantum-files",
+  "title": "<you>/dsh-quantum-files",
   "description": {
     "en": "Embed FileBrowser Quantum into DSH: right-sidebar tab, conversation tab, a separate TLS port, and DSH-session auth.",
     "zh": "把 FileBrowser Quantum 嵌进 DSH：右侧栏 tab、对话区 tab、独立 TLS 端口，复用 DSH 会话鉴权。"
   },
-  "homepage": "https://github.com/<you>/dsh-fbq-bridge",
-  "repository": { "url": "https://github.com/<you>/dsh-fbq-bridge" },
+  "homepage": "https://github.com/<you>/dsh-quantum-files",
+  "repository": { "url": "https://github.com/<you>/dsh-quantum-files" },
   "metadata": {
     "category": "ui",
     "keywords": ["filebrowser", "file-manager"],
@@ -159,4 +159,4 @@ npm test
 
 1. **pnpm 12** 会因为旧锁文件缺 integrity 字段拒绝安装。让用户 `npm i -g pnpm@11.1.3`。
 2. **registry 不通**（国内常见）。让用户加环境变量：
-   `npm_config_registry=https://registry.npmjs.org/ dsh plugin --profile web add dsh-fbq-bridge`
+   `npm_config_registry=https://registry.npmjs.org/ dsh plugin --profile web add dsh-quantum-files`

@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * dsh-fbq-bridge — 鉴权门
+ * dsh-quantum-files — 鉴权门
  *
  * 两个前门各有一层门，都只做"放行/拒绝 + 决定注入的身份"：
  *  - DSH 同源路由：复用 DSH 的浏览器会话（ctx.connection.admit），拿到 Peer 的 principal

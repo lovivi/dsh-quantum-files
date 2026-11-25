@@ -1,4 +1,4 @@
-# dsh-fbq-bridge bundle patch: contributes the bridge row into the HOST plane
+# dsh-quantum-files bundle patch: contributes the bridge row into the HOST plane
 # composition when this package is installed via `dsh plugin add`.
 #
 # The plugin is HOST-PLANE: it owns the FBQ child process, proxies both front
@@ -6,5 +6,5 @@
 # and therefore must land in the host composition — never inside an agent preset.
 
 - insert:
-    - id: fbq-bridge
-      name: dsh-fbq-bridge
+    - id: quantum-files
+      name: dsh-quantum-files

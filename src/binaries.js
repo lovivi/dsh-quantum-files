@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * dsh-fbq-bridge — 内置的 FBQ 发行版清单
+ * dsh-quantum-files — 内置的 FBQ 发行版清单
  *
  * 由 scripts/update-binaries.js 生成，请勿手工编辑。
  * 来源：GitHub Release API（gtsteffaniak/filebrowser v2.1.6-beta）。

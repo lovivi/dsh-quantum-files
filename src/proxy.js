@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * dsh-fbq-bridge — 透明反代
+ * dsh-quantum-files — 透明反代
  *
  * 一个前端（DSH 同源路由 / 独立端口）到 FBQ 的 Unix socket 反代：
  *  - 透传 method / 原始 path / 全部业务头（含 Range、Cookie、Content-*、PROPFIND 之类）
@@ -38,7 +38,7 @@ function forwardableRequestHeaders(req, { dropIdentity = true, extra = {} } = {}
     out[k] = v
   }
   // 交给上游的是本机 socket 反代，明确告知连接语义
-  out.host = 'dsh-fbq-bridge'
+  out.host = 'dsh-quantum-files'
   for (const [k, v] of Object.entries(extra)) {
     if (v === undefined || v === null) continue
     out[k] = v

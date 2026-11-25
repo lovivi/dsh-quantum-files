@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * dsh-fbq-bridge — 配置解析
+ * dsh-quantum-files — 配置解析
  *
  * 优先级：插件 row 的 config（cordis.patch.yml） > $DSH_HOME/fbq/config.json > 内置默认值。
  * 任何一项都可以只写一部分，其余落到默认值。
@@ -100,7 +100,7 @@ function readConfigFile(file) {
     return isPlainObject(parsed) ? parsed : {}
   } catch (e) {
     if (e && e.code === 'ENOENT') return {}
-    throw new Error(`dsh-fbq-bridge: 无法解析配置文件 ${file}: ${e.message}`)
+    throw new Error(`dsh-quantum-files: 无法解析配置文件 ${file}: ${e.message}`)
   }
 }
 
@@ -185,7 +185,7 @@ function renderFbqYaml(cfg) {
   const lines = []
   const push = (s = '') => lines.push(s)
 
-  push('# 由 dsh-fbq-bridge 自动生成，请勿手工编辑（改 $DSH_HOME/fbq/config.json）')
+  push('# 由 dsh-quantum-files 自动生成，请勿手工编辑（改 $DSH_HOME/fbq/config.json）')
   push('server:')
   push('  sources:')
   for (const s of cfg.resolvedSources) {

@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * dsh-fbq-bridge — 独立端口前门
+ * dsh-quantum-files — 独立端口前门
  *
  * 一台自己的 http(s) 监听：先过 Basic 口令门（+ 可选只读），
  * 再把请求以同样的 basePath 前缀交给反代。根路径 302 到 basePath。
@@ -121,7 +121,7 @@ function createDirectServer(cfg, hooks) {
     const admitted = admitDirectRequest(req, cfg)
     if (!admitted.ok) {
       const headers = admitted.challenge
-        ? { 'www-authenticate': 'Basic realm="dsh-fbq-bridge", charset="UTF-8"' }
+        ? { 'www-authenticate': 'Basic realm="dsh-quantum-files", charset="UTF-8"' }
         : undefined
       sendJson(
         res,

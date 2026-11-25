@@ -1,4 +1,4 @@
-# dsh-fbq-bridge — 方案与测试计划
+# dsh-quantum-files — 方案与测试计划
 
 > 把 FileBrowser Quantum（下称 FBQ）作为 sidecar 嵌进 DeepSeek Harness，
 > 提供「DSH 内嵌使用 + 独立端口访问 + 可配置鉴权」三种能力，共用同一个 FBQ 实例。
@@ -90,7 +90,7 @@
 03_dshfile/
 ├─ docs/PLAN.md
 ├─ vendor/filebrowser              # 二进制（自动下载）
-├─ package.json                    # name: dsh-fbq-bridge
+├─ package.json                    # name: dsh-quantum-files
 ├─ cordis.patch.yml                # insert 插件 row
 ├─ src/{index,config,binary,supervisor,proxy,gate}.js
 ├─ client/{index.js,bundle.js}
@@ -238,7 +238,7 @@
 
 | 用例 | 断言 |
 |---|---|
-| T4.1 插件加载 | 日志无报错，Loader 中出现 `dsh-fbq-bridge` row |
+| T4.1 插件加载 | 日志无报错，Loader 中出现 `dsh-quantum-files` row |
 | T4.2 客户端 bundle | `GET /plugins/...` 返回 bundle，浏览器控制台无错 |
 | T4.3 tab 出现 | 对话区出现「文件」tab（人工确认） |
 | T4.4 iframe 可用 | tab 内 FBQ 界面渲染、可点击（人工确认） |

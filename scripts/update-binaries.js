@@ -60,7 +60,7 @@ async function main() {
   lines.push("'use strict'")
   lines.push('')
   lines.push('/**')
-  lines.push(' * dsh-fbq-bridge — 内置的 FBQ 发行版清单')
+  lines.push(' * dsh-quantum-files — 内置的 FBQ 发行版清单')
   lines.push(' *')
   lines.push(' * 由 scripts/update-binaries.js 生成，请勿手工编辑。')
   lines.push(` * 来源：GitHub Release API（${REPO} ${version}）。`)

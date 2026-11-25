@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * dsh-fbq-bridge — Client 平面
+ * dsh-quantum-files — Client 平面
  *
  * 三个入口，都指向同一个 FBQ（同源 iframe /-/fbq/）：
  *   1) 右侧栏 tab 类型（kind = fbq-files）+ guide 卡片「文件 (FBQ)」
@@ -12,8 +12,8 @@
  */
 
 const BASE_PATH = '/-/fbq'
-const TAB_ID = 'dsh-fbq-bridge'
-const SIDEBAR_ID = 'dsh-fbq-bridge.sidebar'
+const TAB_ID = 'dsh-quantum-files'
+const SIDEBAR_ID = 'dsh-quantum-files.sidebar'
 const SIDEBAR_KIND = 'fbq-files'
 const LABEL = '文件'
 const ORDER = 27
@@ -124,7 +124,7 @@ module.exports = {
     const get = (n) => (ctx.get ? ctx.get(n) : ctx[n])
     const slots = get('slots')
     if (!slots || typeof slots.register !== 'function') {
-      console.warn('[dsh-fbq-bridge] slots 不可用，界面未注册')
+      console.warn('[dsh-quantum-files] slots 不可用，界面未注册')
       return
     }
 
@@ -135,10 +135,10 @@ module.exports = {
           sr.openTab(SIDEBAR_KIND)
           return
         } catch (e) {
-          console.warn('[dsh-fbq-bridge] 打开右侧栏失败:', e && e.message)
+          console.warn('[dsh-quantum-files] 打开右侧栏失败:', e && e.message)
         }
       }
-      console.warn('[dsh-fbq-bridge] sidebarRight 不可用，请用对话区「文件」tab')
+      console.warn('[dsh-quantum-files] sidebarRight 不可用，请用对话区「文件」tab')
     }
 
     // ── 1) 对话区 view tab（全宽）─────────────────────────────────────────
@@ -167,9 +167,9 @@ module.exports = {
             },
           ],
         })
-        console.log('[dsh-fbq-bridge] 右侧栏 tab 类型已注册 (kind=%s)', SIDEBAR_KIND)
+        console.log('[dsh-quantum-files] 右侧栏 tab 类型已注册 (kind=%s)', SIDEBAR_KIND)
       } catch (e) {
-        console.warn('[dsh-fbq-bridge] 右侧栏 tab 类型注册失败:', e && e.message)
+        console.warn('[dsh-quantum-files] 右侧栏 tab 类型注册失败:', e && e.message)
       }
 
       // body 是 keyed 槽：选项必须是 key（不是 id），key 取类型定义自己的 id
@@ -177,12 +177,12 @@ module.exports = {
         slots.register({ name: 'sidebar.right.pane.tab', key: SIDEBAR_ID }, () =>
           React.createElement(FbqFrame, { compact: true }),
         )
-        console.log('[dsh-fbq-bridge] 右侧栏 body 已注册 (key=%s)', SIDEBAR_ID)
+        console.log('[dsh-quantum-files] 右侧栏 body 已注册 (key=%s)', SIDEBAR_ID)
       } catch (e) {
-        console.warn('[dsh-fbq-bridge] 右侧栏 body 注册失败:', e && e.message)
+        console.warn('[dsh-quantum-files] 右侧栏 body 注册失败:', e && e.message)
       }
     } else {
-      console.warn('[dsh-fbq-bridge] sidebarRightTabs 不可用，仅提供对话区 tab')
+      console.warn('[dsh-quantum-files] sidebarRightTabs 不可用，仅提供对话区 tab')
     }
 
     // ── 3) 会话头部一键按钮 ──────────────────────────────────────────────
@@ -196,7 +196,7 @@ module.exports = {
       try {
         registerHeader()
       } catch (e) {
-        console.warn('[dsh-fbq-bridge] 头部按钮注册失败:', e && e.message)
+        console.warn('[dsh-quantum-files] 头部按钮注册失败:', e && e.message)
       }
     }
   },

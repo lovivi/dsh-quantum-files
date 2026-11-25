@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * dsh-fbq-bridge — Host 平面入口
+ * dsh-quantum-files — Host 平面入口
  *
  * 把 FileBrowser Quantum 当 sidecar 跑起来，用两个前门接进 DSH：
  *   1) DSH 同源路由  <basePath>/*   → 过 DSH 会话门 → 反代到 FBQ 的 unix socket
@@ -20,13 +20,13 @@ const { proxyRequest, forwardableRequestHeaders } = require('./proxy')
 const { admitDshRequest, identityHeaders } = require('./gate')
 const { createDirectServer } = require('./direct')
 
-const name = 'dsh-fbq-bridge'
+const name = 'dsh-quantum-files'
 const inject = ['webServer']
 
 const STATUS_SUFFIX = '/__bridge/status'
 
 function makeLogger(ctx) {
-  const tag = '[dsh-fbq-bridge]'
+  const tag = '[dsh-quantum-files]'
   const write = (level, args) => {
     try {
       const l = ctx && ctx.logger
@@ -132,7 +132,7 @@ function apply(ctx, rowConfig) {
             await handleProxy(req, res, admitted.principal)
           },
         }),
-      'dsh-fbq-bridge: same-origin route',
+      'dsh-quantum-files: same-origin route',
     )
     logger.log(`同源路由已注册: ${basePath}/*`)
   } else {
@@ -178,7 +178,7 @@ function apply(ctx, rowConfig) {
         .then(() => direct.close())
         .catch(() => {})
     }
-  }, 'dsh-fbq-bridge: lifecycle')
+  }, 'dsh-quantum-files: lifecycle')
 
   // 供同进程其它代码观察状态（非 cordis service，仅挂在 ctx 上）
   try {

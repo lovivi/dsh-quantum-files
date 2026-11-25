@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * dsh-fbq-bridge — FBQ 进程管理
+ * dsh-quantum-files — FBQ 进程管理
  *
  * 负责：二进制定位/下载、fbq.yaml 生成、spawn、健康检查、崩溃退避重启、清理。
  * 所有失败都以 status 对象暴露给上层，绝不 throw 到 cordis 的 apply 里。
