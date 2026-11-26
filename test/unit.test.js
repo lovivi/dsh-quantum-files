@@ -170,6 +170,26 @@ test('proxy 模式注入身份头；password 模式不注入', () => {
   assert.deepEqual(identityHeaders(pwCfg, 'song'), {})
 })
 
+test('filesUrlForCwd：必须带来源名，路径相对来源根', () => {
+  const { filesUrlForCwd } = require('../src/urls')
+  const root = [{ name: 'root', path: '/' }]
+  assert.equal(
+    filesUrlForCwd('/-/fbq', root, '/home/song/work/x'),
+    '/-/fbq/files/root/home/song/work/x',
+  )
+  const proj = [{ name: 'proj', path: '/home/song/work' }]
+  assert.equal(filesUrlForCwd('/-/fbq', proj, '/home/song/work/x'), '/-/fbq/files/proj/x')
+  // 多来源取最长前缀
+  const multi = [{ name: 'root', path: '/' }, { name: 'proj', path: '/home/song/work' }]
+  assert.equal(filesUrlForCwd('/-/fbq', multi, '/home/song/work/x'), '/-/fbq/files/proj/x')
+  // 不在任何来源下 → 第一个来源 + 完整路径（让 FBQ 自己报权限）
+  assert.equal(filesUrlForCwd('/-/fbq', proj, '/tmp/other'), '/-/fbq/files/proj/tmp/other')
+  // 空 cwd → 第一个来源根
+  assert.equal(filesUrlForCwd('/-/fbq', root, ''), '/-/fbq/files/root/')
+  // 空格与特殊字符要编码
+  assert.equal(filesUrlForCwd('/-/fbq', root, '/a b/c'), '/-/fbq/files/root/a%20b/c')
+})
+
 test('配置生成包含 baseURL / socket / proxy 头 / 默认权限', () => {
   const cfg = loadConfig({
     fbq: { basePath: '/-/fbq', socketPath: '/tmp/x.sock', sources: [{ name: 'workspace', path: '/tmp' }] },

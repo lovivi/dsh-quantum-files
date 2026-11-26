@@ -19,6 +19,7 @@ const { FbqSupervisor } = require('./supervisor')
 const { proxyRequest, forwardableRequestHeaders } = require('./proxy')
 const { admitDshRequest, identityHeaders } = require('./gate')
 const { createDirectServer } = require('./direct')
+const { filesUrlForCwd } = require('./urls')
 
 const name = 'dsh-quantum-files'
 const inject = ['webServer']
@@ -133,7 +134,7 @@ function apply(ctx, rowConfig) {
               } catch (e) {
                 logger.warn('解析会话工作目录失败:', e && e.message)
               }
-              const url = cwd ? `${basePath}/files${String(cwd).split('/').map(encodeURIComponent).join('/')}` : `${basePath}/files/`
+              const url = filesUrlForCwd(basePath, cfg.resolvedSources, cwd)
               sendJson(res, 200, { session: id, cwd, url })
               return
             }
