@@ -121,6 +121,22 @@ function apply(ctx, rowConfig) {
           kind: 'prefix',
           path: basePath,
           handler: async (req, res) => {
+            if (pathOnly(req.url) === `${basePath}/__bridge/session-cwd`) {
+              // 把会话的工作目录交给客户端，用于 iframe 深链。导入会话同样适用。
+              const sessions = getService('sessions')
+              const q = (req.url || '').split('?')[1] || ''
+              const id = new URLSearchParams(q).get('session') || ''
+              let cwd = ''
+              try {
+                const rec = sessions && typeof sessions.get === 'function' ? sessions.get(id) : null
+                cwd = (rec && ((rec.header && rec.header.cwd) || rec.cwd)) || ''
+              } catch (e) {
+                logger.warn('解析会话工作目录失败:', e && e.message)
+              }
+              const url = cwd ? `${basePath}/files${String(cwd).split('/').map(encodeURIComponent).join('/')}` : `${basePath}/files/`
+              sendJson(res, 200, { session: id, cwd, url })
+              return
+            }
             if (pathOnly(req.url) === statusPath) {
               sendJson(res, 200, { ok: true, status: supervisor.status(), direct: direct.info() })
               return

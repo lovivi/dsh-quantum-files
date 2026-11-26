@@ -13,40 +13,19 @@ window.__ModuleLoader__.load({
     /**
      * dsh-quantum-files — Client 平面
      *
-     * 三个入口，都指向同一个 FBQ（同源 iframe /-/fbq/）：
+     * 三个入口，都指向同一个 FBQ：
      *   1) 右侧栏 tab 类型（kind = fbq-files）+ guide 卡片「文件 (FBQ)」
-     *   2) 会话头部动作按钮「文件」—— 一键把右栏打开到 FBQ
+     *   2) 会话头部动作按钮「📁 文件」—— 一键把右栏打开到 FBQ
      *   3) 对话区 view tab（全宽，适合当主文件管理器用）
+     *
+     * 打开位置由 **host** 决定：客户端把 sessionId 交给 /-/fbq/__bridge/session-cwd，
+     * host 用 ctx.sessions 解析该会话的工作目录，返回 /files/<cwd> 给 iframe。
+     * 这样不依赖客户端 sessions 服务的内部形状，导入会话也能跟随它自己的 cwd。
      *
      * 零依赖：React 走 platform module（window.__ModuleLoader__ 的 require("react")）。
      */
 
     const BASE_PATH = '/-/fbq'
-    /** 会话服务（动态 inject）：用来把 iframe 深链到当前会话的工作目录。 */
-    let sessionsSvc = null
-
-    /** 把绝对路径编码成可拼进 /files/<path> 的形式。 */
-    function encodePath(p) {
-      return String(p || '')
-        .split('/')
-        .map((seg) => encodeURIComponent(seg))
-        .join('/')
-    }
-
-    /** 取会话的 cwd；拿不到就退回 FBQ 根。 */
-    function sessionCwd(sessionId) {
-      try {
-        const s = sessionsSvc && sessionsSvc.byId && sessionsSvc.byId[sessionId]
-        return (s && (s.cwd || (s.header && s.header.cwd))) || ''
-      } catch {
-        return ''
-      }
-    }
-
-    function filesUrl(sessionId) {
-      const cwd = sessionCwd(sessionId)
-      return cwd ? `${BASE_PATH}/files${encodePath(cwd)}` : `${BASE_PATH}/files/`
-    }
     const TAB_ID = 'dsh-quantum-files'
     const SIDEBAR_ID = 'dsh-quantum-files.sidebar'
     const SIDEBAR_KIND = 'fbq-files'
@@ -63,11 +42,31 @@ window.__ModuleLoader__.load({
       cursor: 'pointer',
     }
 
+    /** 向 host 要当前会话对应的 FBQ 地址。 */
+    function useFilesUrl(sessionId) {
+      const [url, setUrl] = React.useState(`${BASE_PATH}/files/`)
+      React.useEffect(() => {
+        let alive = true
+        if (!sessionId) return () => { alive = false }
+        fetch(`${BASE_PATH}/__bridge/session-cwd?session=${encodeURIComponent(sessionId)}`, {
+          credentials: 'same-origin',
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            if (!alive || !d) return
+            if (typeof d.url === 'string' && d.url) setUrl(d.url)
+          })
+          .catch(() => {})
+        return () => { alive = false }
+      }, [sessionId])
+      return url
+    }
+
     /** FBQ 的 iframe 面板。compact 用于窄容器（右侧栏）。 */
     function FbqFrame(props) {
       const compact = Boolean(props && props.compact)
       const sessionId = props && props.sessionId
-      const target = filesUrl(sessionId)
+      const target = useFilesUrl(sessionId)
       const [nonce, setNonce] = React.useState(0)
       const [expanded, setExpanded] = React.useState(false)
       const [loaded, setLoaded] = React.useState(false)
@@ -78,7 +77,7 @@ window.__ModuleLoader__.load({
       }, [])
       const openExternal = React.useCallback(() => {
         window.open(target, '_blank', 'noopener,noreferrer')
-      }, [])
+      }, [target])
       const toggleExpand = React.useCallback(() => setExpanded((v) => !v), [])
 
       const toolbar = React.createElement(
@@ -106,7 +105,7 @@ window.__ModuleLoader__.load({
       )
 
       const frame = React.createElement('iframe', {
-        key: nonce,
+        key: `${nonce}:${target}`,
         src: target,
         title: 'FileBrowser Quantum',
         onLoad: () => setLoaded(true),
@@ -159,11 +158,6 @@ window.__ModuleLoader__.load({
       inject: ['slots', 'sidebarRightTabs', 'sidebarRight'],
       apply(ctx) {
         const get = (n) => (ctx.get ? ctx.get(n) : ctx[n])
-        try {
-          if (typeof ctx.inject === 'function') ctx.inject(['sessions'], (scope) => { sessionsSvc = scope && scope.sessions })
-        } catch (e) {
-          console.warn('[dsh-quantum-files] sessions inject 失败:', e && e.message)
-        }
         const slots = get('slots')
         if (!slots || typeof slots.register !== 'function') {
           console.warn('[dsh-quantum-files] slots 不可用，界面未注册')
