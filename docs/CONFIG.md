@@ -20,7 +20,8 @@
 |---|---|---|
 | `fbq.basePath` | `/-/fbq` | FBQ 的 `http.baseURL`，也是两个前门的路径前缀 |
 | `fbq.workspaceRoot` | 进程启动目录 | 未配 `sources` 时的唯一来源目录 |
-| `fbq.sources` | `[{name:"workspace", path:"<workspaceRoot>"}]` | 多目录挂载：`[{name, path, defaultPermissions}]` |
+| `fbq.followSession` | `true` | 文件页跟随当前会话的工作目录：FBQ 挂根来源 `/`，页面深链到 `/files/<cwd>` |
+| `fbq.sources` | 随 `followSession` | 显式多目录挂载：`[{name, path, defaultPermissions}]`；配了就不再跟随会话 |
 | `fbq.dataDir` | `$DSH_HOME/fbq/data` | FBQ 的数据库、缓存、`fbq.yaml` 都在这 |
 | `fbq.socketPath` | `<dataDir>/fbq.sock` | FBQ 监听的 Unix socket |
 | `fbq.extraConfig` | `{}` | 原样并入生成的 `fbq.yaml`，逃生口 |
@@ -82,6 +83,17 @@
 3. `data/filebrowser.sqlite` — FBQ 的库：用户、分享、配额
 4. `data/fbq.sock` — 前门与 FBQ 之间的 socket
 5. `bin/<version>/filebrowser` — 校验过的二进制
+
+## 路径与来源怎么决定
+
+| 你的配置 | FBQ 的来源 | 文件页打开位置 |
+|---|---|---|
+| 什么都不配（默认） | 根来源 `/` | 当前会话的工作目录（`/files/<cwd>`） |
+| `followSession: false` | `workspaceRoot` 一个来源 | 该目录 |
+| 显式 `sources: [...]` | 你给的每个来源 | 各来源的根（不跟随会话） |
+
+> 默认的根来源意味着**通过 DSH 会话或独立端口可以浏览整台机器**。只想开放某个项目就显式配
+> `fbq.sources`，或设 `followSession: false` 固定到 `workspaceRoot`。
 
 ## 排查
 

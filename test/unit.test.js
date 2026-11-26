@@ -189,8 +189,17 @@ test('basePath 规范化', () => {
   assert.equal(load({ fbq: { basePath: '' } }).fbq.basePath, '/-/fbq')
 })
 
-test('未配置 sources 时自动单 source 指向 workspaceRoot', () => {
-  const cfg = load({ fbq: { workspaceRoot: '/tmp/ws' } })
-  assert.equal(cfg.resolvedSources.length, 1)
-  assert.equal(cfg.resolvedSources[0].path, '/tmp/ws')
+test('未配置 sources：默认跟随会话（根来源），关掉后才退回 workspaceRoot', () => {
+  const follow = load({ fbq: { workspaceRoot: '/tmp/ws' } })
+  assert.equal(follow.resolvedSources.length, 1)
+  assert.equal(follow.resolvedSources[0].name, 'root')
+  assert.equal(follow.resolvedSources[0].path, '/')
+
+  const pinned = load({ fbq: { workspaceRoot: '/tmp/ws', followSession: false } })
+  assert.equal(pinned.resolvedSources[0].name, 'workspace')
+  assert.equal(pinned.resolvedSources[0].path, '/tmp/ws')
+
+  const explicit = load({ fbq: { workspaceRoot: '/tmp/ws', sources: [{ name: 'proj', path: '/tmp/p' }] } })
+  assert.equal(explicit.resolvedSources[0].name, 'proj')
+  assert.equal(explicit.resolvedSources[0].path, '/tmp/p')
 })

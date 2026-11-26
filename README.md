@@ -97,6 +97,7 @@ DSH :3080  /-/fbq/*  → [校验 DSH 会话] ─┐
 | 看不到「📁 文件」按钮 | 页面还是旧 bundle | 硬刷新（Ctrl+Shift+R） |
 | 右侧栏显示「这类内容还没有可用的查看方式」 | 之前版本的 bug（`keyed` 槽位传错参数） | 升级到 ≥0.1.0 并硬刷新 |
 | 页面里 503、提示 fbq-not-ready | FBQ 还在启动或正在重启 | 等 10 秒刷新；仍不行看 `~/.dsh/fbq/data/` 下的进程状态 |
+| 文件页显示的不是当前项目 | 旧版本把来源写死成单一目录 | 升级到 ≥0.1.1；仍不对就在 config.json 里显式写 `fbq.sources` |
 | `dsh plugin add` 报 lockfile 校验失败 | pnpm 12 对旧锁文件更严格 | 用 pnpm 11：`npm i -g pnpm@11.1.3` |
 | 装依赖卡住不动 | registry 不通（国内） | `npm_config_registry=https://registry.npmjs.org/ dsh plugin --profile web add dsh-quantum-files` |
 

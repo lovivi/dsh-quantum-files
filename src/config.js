@@ -38,8 +38,10 @@ const DEFAULTS = {
     dataDir: null, // null = $DSH_HOME/fbq/data
     socketPath: null, // null = <dataDir>/fbq.sock
     basePath: '/-/fbq',
-    // 暴露给 FBQ 的一个或多个 source
-    sources: [], // 空 = 自动单 source 指到 workspaceRoot
+    // 跟随当前会话的工作目录：FBQ 挂根来源，客户端深链到会话 cwd
+    followSession: true,
+    // 暴露给 FBQ 的一个或多个 source（显式配置后 followSession 不再生效）
+    sources: [], // 空 + followSession=false 时退回单 source 指到 workspaceRoot
     workspaceRoot: null, // null = 进程 cwd
     trustProxyHeaders: true,
     extraConfig: {}, // 原样并入 fbq.yaml（逃生口）
@@ -150,9 +152,13 @@ function loadConfig(rowConfig, options) {
   const root = cfg.fbq.workspaceRoot ? resolvePath(cfg.fbq.workspaceRoot, process.cwd()) : process.cwd()
   cfg.fbq.workspaceRoot = root
 
-  // sources 规范化：未配置则自动单 source 指到 workspaceRoot
-  const sources = Array.isArray(cfg.fbq.sources) && cfg.fbq.sources.length > 0 ? cfg.fbq.sources : null
-  cfg.resolvedSources = (sources || [{ name: 'workspace', path: root }]).map((s, i) => {
+  // sources 规范化：
+  //   显式 sources > followSession（根来源，客户端深链到会话 cwd）> 单个 workspaceRoot
+  const explicit = Array.isArray(cfg.fbq.sources) && cfg.fbq.sources.length > 0 ? cfg.fbq.sources : null
+  const fallback = cfg.fbq.followSession
+    ? [{ name: 'root', path: '/' }]
+    : [{ name: 'workspace', path: root }]
+  cfg.resolvedSources = (explicit || fallback).map((s, i) => {
     const src = typeof s === 'string' ? { path: s } : { ...s }
     return {
       name: src.name || (i === 0 ? 'workspace' : `source${i}`),

@@ -12,6 +12,31 @@
  */
 
 const BASE_PATH = '/-/fbq'
+/** 会话服务（动态 inject）：用来把 iframe 深链到当前会话的工作目录。 */
+let sessionsSvc = null
+
+/** 把绝对路径编码成可拼进 /files/<path> 的形式。 */
+function encodePath(p) {
+  return String(p || '')
+    .split('/')
+    .map((seg) => encodeURIComponent(seg))
+    .join('/')
+}
+
+/** 取会话的 cwd；拿不到就退回 FBQ 根。 */
+function sessionCwd(sessionId) {
+  try {
+    const s = sessionsSvc && sessionsSvc.byId && sessionsSvc.byId[sessionId]
+    return (s && (s.cwd || (s.header && s.header.cwd))) || ''
+  } catch {
+    return ''
+  }
+}
+
+function filesUrl(sessionId) {
+  const cwd = sessionCwd(sessionId)
+  return cwd ? `${BASE_PATH}/files${encodePath(cwd)}` : `${BASE_PATH}/files/`
+}
 const TAB_ID = 'dsh-quantum-files'
 const SIDEBAR_ID = 'dsh-quantum-files.sidebar'
 const SIDEBAR_KIND = 'fbq-files'
@@ -31,6 +56,8 @@ const btnStyle = {
 /** FBQ 的 iframe 面板。compact 用于窄容器（右侧栏）。 */
 function FbqFrame(props) {
   const compact = Boolean(props && props.compact)
+  const sessionId = props && props.sessionId
+  const target = filesUrl(sessionId)
   const [nonce, setNonce] = React.useState(0)
   const [expanded, setExpanded] = React.useState(false)
   const [loaded, setLoaded] = React.useState(false)
@@ -40,7 +67,7 @@ function FbqFrame(props) {
     setNonce((n) => n + 1)
   }, [])
   const openExternal = React.useCallback(() => {
-    window.open(`${BASE_PATH}/`, '_blank', 'noopener,noreferrer')
+    window.open(target, '_blank', 'noopener,noreferrer')
   }, [])
   const toggleExpand = React.useCallback(() => setExpanded((v) => !v), [])
 
@@ -70,7 +97,7 @@ function FbqFrame(props) {
 
   const frame = React.createElement('iframe', {
     key: nonce,
-    src: `${BASE_PATH}/`,
+    src: target,
     title: 'FileBrowser Quantum',
     onLoad: () => setLoaded(true),
     allow: 'clipboard-read; clipboard-write; fullscreen',
@@ -122,6 +149,11 @@ module.exports = {
   inject: ['slots', 'sidebarRightTabs', 'sidebarRight'],
   apply(ctx) {
     const get = (n) => (ctx.get ? ctx.get(n) : ctx[n])
+    try {
+      if (typeof ctx.inject === 'function') ctx.inject(['sessions'], (scope) => { sessionsSvc = scope && scope.sessions })
+    } catch (e) {
+      console.warn('[dsh-quantum-files] sessions inject 失败:', e && e.message)
+    }
     const slots = get('slots')
     if (!slots || typeof slots.register !== 'function') {
       console.warn('[dsh-quantum-files] slots 不可用，界面未注册')
@@ -174,8 +206,8 @@ module.exports = {
 
       // body 是 keyed 槽：选项必须是 key（不是 id），key 取类型定义自己的 id
       try {
-        slots.register({ name: 'sidebar.right.pane.tab', key: SIDEBAR_ID }, () =>
-          React.createElement(FbqFrame, { compact: true }),
+        slots.register({ name: 'sidebar.right.pane.tab', key: SIDEBAR_ID }, (props) =>
+          React.createElement(FbqFrame, { compact: true, sessionId: props && props.sessionId }),
         )
         console.log('[dsh-quantum-files] 右侧栏 body 已注册 (key=%s)', SIDEBAR_ID)
       } catch (e) {
